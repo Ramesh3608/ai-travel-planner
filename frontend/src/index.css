@@ -12,13 +12,13 @@ body {
     radial-gradient(circle at 15% 0%, rgba(91, 184, 255, 0.12), transparent 40%),
     radial-gradient(circle at 85% 10%, rgba(255, 122, 69, 0.10), transparent 35%);
   background-attachment: fixed;
+  margin: 0;
 }
 
 ::selection {
   background: rgba(255, 122, 69, 0.35);
 }
 
-/* Minimal scrollbar styling for the dark theme */
 ::-webkit-scrollbar {
   width: 10px;
 }

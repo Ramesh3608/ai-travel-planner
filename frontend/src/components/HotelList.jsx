@@ -1,5 +1,3 @@
-'use client';
-
 export default function HotelList({ hotels }) {
   if (!hotels?.length) return null;
 

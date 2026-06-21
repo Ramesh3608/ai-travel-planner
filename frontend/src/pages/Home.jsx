@@ -1,6 +1,6 @@
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
-export default function HomePage() {
+export default function Home() {
   return (
     <main className="relative overflow-hidden">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6">
@@ -10,13 +10,13 @@ export default function HomePage() {
           </span>
           <nav className="flex gap-3">
             <Link
-              href="/login"
+              to="/login"
               className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 hover:text-white"
             >
               Log in
             </Link>
             <Link
-              href="/register"
+              to="/register"
               className="rounded-full bg-ember-500 px-4 py-2 text-sm font-semibold text-ink-950 transition hover:bg-ember-400"
             >
               Get started
@@ -38,13 +38,13 @@ export default function HomePage() {
           </p>
           <div className="flex gap-3">
             <Link
-              href="/register"
+              to="/register"
               className="rounded-full bg-ember-500 px-6 py-3 font-semibold text-ink-950 shadow-glow transition hover:bg-ember-400"
             >
               Build my itinerary
             </Link>
             <Link
-              href="/login"
+              to="/login"
               className="rounded-full border border-ink-700 px-6 py-3 font-semibold text-slate-200 hover:border-sky-500/50"
             >
               I already have an account

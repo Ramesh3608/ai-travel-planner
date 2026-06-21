@@ -1,5 +1,3 @@
-'use client';
-
 export default function VersionHistory({ versions, onRevert, reverting }) {
   if (!versions?.length) return null;
 

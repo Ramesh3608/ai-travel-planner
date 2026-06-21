@@ -1,28 +1,25 @@
-'use client';
-
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
+    navigate('/login');
   };
 
   return (
     <header className="border-b border-ink-700 bg-ink-950/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/dashboard" className="text-lg font-extrabold tracking-tight text-white">
+        <Link to="/dashboard" className="text-lg font-extrabold tracking-tight text-white">
           Voyager <span className="text-ember-500">AI</span>
         </Link>
         <div className="flex items-center gap-4">
           {user && <span className="hidden text-sm text-slate-400 sm:inline">Hi, {user.name}</span>}
           <Link
-            href="/dashboard/new"
+            to="/dashboard/new"
             className="rounded-full bg-ember-500 px-4 py-1.5 text-sm font-semibold text-ink-950 transition hover:bg-ember-400"
           >
             + New trip

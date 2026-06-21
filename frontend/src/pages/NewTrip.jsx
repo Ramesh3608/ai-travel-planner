@@ -1,10 +1,8 @@
-'use client';
-
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import ProtectedRoute from '../../../components/ProtectedRoute';
-import Navbar from '../../../components/Navbar';
-import { api } from '../../../lib/api';
+import { useNavigate } from 'react-router-dom';
+import ProtectedRoute from '../components/ProtectedRoute';
+import Navbar from '../components/Navbar';
+import { api } from '../lib/api';
 
 const INTEREST_OPTIONS = ['Food', 'Culture', 'Adventure', 'Shopping', 'Nature', 'Nightlife', 'Relaxation'];
 const MONTHS = [
@@ -13,7 +11,7 @@ const MONTHS = [
 ];
 
 function NewTripForm() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     destination: '',
     durationDays: 5,
@@ -48,7 +46,7 @@ function NewTripForm() {
         ...form,
         durationDays: Number(form.durationDays),
       });
-      router.push(`/dashboard?tripId=${data.trip._id}`);
+      navigate(`/dashboard?tripId=${data.trip._id}`);
     } catch (err) {
       setError(err.message || 'Failed to generate itinerary. Please try again.');
     } finally {
@@ -176,7 +174,7 @@ function NewTripForm() {
   );
 }
 
-export default function NewTripPage() {
+export default function NewTrip() {
   return (
     <ProtectedRoute>
       <NewTripForm />

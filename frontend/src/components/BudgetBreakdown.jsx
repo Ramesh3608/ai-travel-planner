@@ -1,5 +1,3 @@
-'use client';
-
 const ROWS = [
   { key: 'accommodation', label: 'Accommodation' },
   { key: 'food', label: 'Food & Drink' },

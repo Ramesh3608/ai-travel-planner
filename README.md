@@ -26,15 +26,25 @@ activities"), and roll back to any previous version of the itinerary.
 
 | Layer      | Choice                                   |
 |------------|-------------------------------------------|
-| Frontend   | Next.js 14 (App Router) + Tailwind CSS, JavaScript |
+| Frontend   | React 18 (Vite) + React Router + Tailwind CSS, JavaScript |
 | Backend    | Node.js + Express, JavaScript             |
 | Database   | MongoDB + Mongoose                        |
 | Auth       | JWT in an **httpOnly cookie** + bcrypt    |
 | AI         | Google Gemini (`gemini-2.5-flash`), JSON mode |
 | Climate data | Open-Meteo Geocoding + Historical Weather APIs (free, no key) |
 
-This matches the assessment's preferred stack, with JavaScript chosen end-to-end (not
-TypeScript) to keep the codebase approachable and the review fast — see [Key Design Decisions](#6-key-design-decisions--trade-offs) for the reasoning.
+**Why React (Vite) instead of Next.js**, since the assessment names Next.js as preferred but
+explicitly allows an equivalent with justification: this app has no requirement for
+server-side rendering, SEO, or server components — every page is behind auth except the
+landing page, so there's nothing search engines need to index and nothing that benefits from
+SSR. A pure client-side SPA (Vite + React Router) is simpler to reason about end-to-end (one
+rendering model, not server components vs. client components), has a faster local dev loop,
+and removes an entire class of Next.js-specific concerns (the `'use client'` boundary,
+`Suspense` requirements around `useSearchParams`, edge vs. node runtimes) that add no value
+for this use case. The trade-off: I give up Next's built-in routing conventions and
+zero-config Vercel deployment story in exchange for a smaller, more transparent build (Vite)
+and an explicit, easy-to-read router (`App.jsx`). JavaScript (not TypeScript) end-to-end for
+the same approachability reasoning as before.
 
 ## 3. Setup Instructions
 
@@ -54,7 +64,7 @@ npm run dev             # http://localhost:5000
 
 # Frontend (in a new terminal)
 cd frontend
-cp .env.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:5000
+cp .env.example .env.local   # VITE_API_URL=http://localhost:5000
 npm install
 npm run dev              # http://localhost:3000
 ```
@@ -66,26 +76,30 @@ Visit `http://localhost:3000`, register an account, and create a trip.
 - **Backend** → Render / Railway. Set env vars `PORT`, `MONGO_URI`, `JWT_SECRET`,
   `GEMINI_API_KEY`, `GEMINI_MODEL`, `NODE_ENV=production`, and `CLIENT_ORIGIN` to your
   deployed frontend's exact origin (no trailing slash).
-- **Frontend** → Vercel. Set `NEXT_PUBLIC_API_URL` to your deployed backend's URL.
+- **Frontend** → Vercel, Netlify, or any static host (Vite builds to a static `dist/` folder —
+  build command `npm run build`, output directory `dist`). Set `VITE_API_URL` to your deployed
+  backend's URL as a build-time environment variable (Vite inlines `VITE_*` vars at build time,
+  so it must be set *before* building, not just at runtime).
 - Because auth uses an httpOnly cross-site cookie, the backend's CORS config must have
   `credentials: true` and `CLIENT_ORIGIN` set precisely, and the cookie is set with
-  `sameSite: 'none'; secure: true` in production (both Render/Railway and Vercel serve HTTPS,
-  satisfying the `secure` requirement).
+  `sameSite: 'none'; secure: true` in production (both Render/Railway and Vercel/Netlify serve
+  HTTPS, satisfying the `secure` requirement).
 
 ## 4. High-Level Architecture
 
 ```
-Next.js (App Router)  --fetch, credentials:'include'-->  Express API
-   AuthContext                                              ├─ /api/auth   (register/login/logout/me)
-   ProtectedRoute                                            └─ /api/trips  (protected by JWT middleware)
-   dashboard/* pages                                                ├─ Mongoose -> MongoDB (User, Trip)
-                                                                     ├─ geminiService  -> Google Gemini API
-                                                                     └─ weatherService -> Open-Meteo APIs
+React SPA (Vite + React Router)  --fetch, credentials:'include'-->  Express API
+   AuthContext                                                        ├─ /api/auth   (register/login/logout/me)
+   ProtectedRoute                                                      └─ /api/trips  (protected by JWT middleware)
+   pages/* (Home, Login, Dashboard...)                                        ├─ Mongoose -> MongoDB (User, Trip)
+                                                                               ├─ geminiService  -> Google Gemini API
+                                                                               └─ weatherService -> Open-Meteo APIs
 ```
 
-- **Frontend**: client components only where interactivity is needed (forms, dashboard);
-  a single `AuthContext` is the source of truth for the logged-in user; a thin `lib/api.js`
-  wrapper centralizes fetch + error handling.
+- **Frontend**: a single-page React app (no SSR). `App.jsx` defines five routes; `AuthContext`
+  is the single source of truth for the logged-in user, fetched once on mount via `/api/auth/me`;
+  `ProtectedRoute` redirects to `/login` if that check fails. A thin `lib/api.js` wrapper
+  centralizes fetch + error handling for every request.
 - **Backend**: classic layered structure — `routes` → `controllers` → `models`/`services`.
   `middleware/auth.js` verifies the JWT and attaches `req.user.id`; every trip query in
   `tripController.js` is scoped with `{ userId: req.user.id }`, which is what actually enforces

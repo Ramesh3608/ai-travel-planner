@@ -1,26 +1,22 @@
-'use client';
-
-import { Suspense, useCallback, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import ProtectedRoute from '../../components/ProtectedRoute';
-import Navbar from '../../components/Navbar';
-import TripCard from '../../components/TripCard';
-import BudgetBreakdown from '../../components/BudgetBreakdown';
-import HotelList from '../../components/HotelList';
-import PackingList from '../../components/PackingList';
-import VersionHistory from '../../components/VersionHistory';
-import ItineraryDay from '../../components/ItineraryDay';
-import { api } from '../../lib/api';
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import ProtectedRoute from '../components/ProtectedRoute';
+import Navbar from '../components/Navbar';
+import TripCard from '../components/TripCard';
+import BudgetBreakdown from '../components/BudgetBreakdown';
+import HotelList from '../components/HotelList';
+import PackingList from '../components/PackingList';
+import VersionHistory from '../components/VersionHistory';
+import ItineraryDay from '../components/ItineraryDay';
+import { api } from '../lib/api';
 
 function DashboardContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [trips, setTrips] = useState([]);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [busyDay, setBusyDay] = useState(null); // dayNumber currently regenerating
+  const [busyDay, setBusyDay] = useState(null);
   const [reverting, setReverting] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,16 +34,16 @@ function DashboardContent() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams]);
-
-  useEffect(() => {
-    loadTrips();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    loadTrips();
+  }, [loadTrips]);
+
   const selectTrip = (trip) => {
     setSelectedTrip(trip);
-    router.replace(`/dashboard?tripId=${trip._id}`);
+    setSearchParams({ tripId: trip._id });
   };
 
   const persistItinerary = async (updatedItinerary) => {
@@ -155,7 +151,7 @@ function DashboardContent() {
           <span className="mb-4 text-5xl">✈️</span>
           <p className="mb-4 text-slate-400">You haven&apos;t planned any trips yet.</p>
           <Link
-            href="/dashboard/new"
+            to="/dashboard/new"
             className="rounded-full bg-ember-500 px-5 py-2.5 text-sm font-semibold text-ink-950 hover:bg-ember-400"
           >
             Create your first trip
@@ -222,9 +218,7 @@ function DashboardPage() {
   return (
     <main>
       <Navbar />
-      <Suspense fallback={<div className="p-10 text-center text-slate-400">Loading…</div>}>
-        <DashboardContent />
-      </Suspense>
+      <DashboardContent />
     </main>
   );
 }

@@ -1,5 +1,3 @@
-'use client';
-
 const CATEGORY_ORDER = ['Documents', 'Clothing', 'Gear', 'Other'];
 
 export default function PackingList({ trip, onToggleItem }) {
